@@ -1,0 +1,145 @@
+from django.db import models
+import decimal
+# Create models here.
+
+class Manufacture(models.Model):
+    names = models.CharField(max_length=100, primary_key=True)
+
+    def __str__(self):
+        return self.names
+class Product(models.Model):
+    Id = models.AutoField(primary_key=True) 
+    Name = models.CharField(max_length=100)
+    Type = models.CharField(max_length=50)
+    nameManufacture = models.ForeignKey('Manufacture', on_delete = models.PROTECT)
+
+    def __str__(self):
+        return self.Name
+
+class Color(models.Model):
+    names = models.CharField(max_length=50, primary_key=True)
+    idProduct = models.ManyToManyField('Product', through='Product_Color')
+
+    def __str__(self):
+        return self.names
+
+class Product_Color(models.Model):
+    Id = models.AutoField(primary_key=True)
+    idProduct = models.ForeignKey('Product', on_delete=models.CASCADE)
+    nameColor = models.ForeignKey(Color, on_delete=models.CASCADE)
+    Price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.idProduct
+
+class Laptop(Product):
+    CPU = models.CharField(max_length=50)
+    RAM = models.CharField(max_length=50)
+    ROM = models.CharField(max_length=50)
+    Graphic_Card = models.CharField(max_length=50)
+    Battery = models.CharField(max_length=30)
+    operatorSystem = models.CharField(max_length=50)
+    Others = models.CharField(max_length=50)
+
+class Smartphone(Product):
+    Operator_System = models.CharField(max_length=50)
+    CPU = models.CharField(max_length=50)
+    RAM = models.CharField(max_length=50)
+    ROM = models.CharField(max_length=50)
+    Battery = models.CharField(max_length=30)
+    Others = models.CharField(max_length=50)
+
+class Earphone(Product):
+    connectionType = models.CharField(max_length=50)
+    Design = models.CharField(max_length=50)
+    Frequency_Response = models.CharField(max_length=50)
+
+class Review(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Title = models.CharField(max_length=100)
+    Content = models.TextField()
+    idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.Title
+
+class ImageProduct(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=50)
+    linkImg = models.CharField(max_length=255)
+    idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+    
+
+class Branch(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=50)
+    Address = models.CharField(max_length=50)
+    Phone = models.CharField(max_length=20)
+    EstablishmentDate = models.DateField(auto_now=True)
+    idProductColors = models.ManyToManyField(Product_Color, through='Branch_Product_Color')
+    def __str__(self):
+        return self.Name
+    
+class Branch_Product_Color(models.Model):
+    Id = models.AutoField(primary_key=True)
+    idProductColor = models.ForeignKey(Product_Color, on_delete=models.PROTECT)
+    idBranch = models.ForeignKey(Branch, on_delete=models.PROTECT)
+    Amount = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.idProductColor
+
+class Promotion(models.Model):
+    Id = models.AutoField(primary_key=True)
+    timeStart = models.DateTimeField(auto_now=True)
+    timeEnd = models.DateTimeField(auto_now=True)
+    Active = models.BooleanField(default=False)
+    idBrandProductColor = models.ManyToManyField(Branch_Product_Color, through='Branch_Promotion_Product')
+
+    def __str__(self):
+        return self.idBrandProductColor
+
+class Branch_Promotion_Product(models.Model):
+    Id = models.AutoField(primary_key=True)
+    idPromotion = models.ForeignKey(Promotion, on_delete=models.PROTECT)
+    idBrandProductColor = models.ForeignKey(Branch_Product_Color, on_delete=models.PROTECT)
+    discountRate = models.FloatField(default=0.0)
+
+class Comment(models.Model):
+    Id = models.AutoField(primary_key=True)
+    contentComment = models.CharField(max_length=100)
+    idUser = models.ForeignKey('User', on_delete=models.CASCADE)
+    idProduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+
+class Order(models.Model):
+    Id = models.AutoField(primary_key=True)
+    orderDate = models.DateTimeField(auto_now_add=True)
+    deliveryAddress = models.CharField(max_length=50)
+    deliveryPhone = models.CharField(max_length=50)
+    Status = models.CharField(max_length=30)
+    idBranchProductColor = models.ManyToManyField(Branch_Product_Color,through='OrderDetail')
+    idUser = models.ForeignKey('User', on_delete=models.PROTECT)
+    
+class OrderDetail(models.Model):
+    Id = models.AutoField(primary_key=True)
+    idOder = models.ForeignKey(Order, on_delete=models.PROTECT)
+    idBrandProductColor = models.ForeignKey(Branch_Product_Color, on_delete=models.PROTECT)
+    Quantity = models.IntegerField(default=0)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+class User(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=30)
+    Email = models.EmailField(max_length=100, blank=True, null=True, default='')
+    Gender = models.BooleanField(default=False, blank=True, null=True)
+    Hometown = models.CharField(max_length=50, blank=True, null=True,default='')
+    userName = models.CharField(max_length=30, blank=True, null=True,default='')
+    passWord = models.CharField(max_length=255, blank=True, null=True,default='')
+    birthDay = models.DateField(auto_now=True, blank=True, null=True,)
+    phoneNumber = models.CharField(max_length=20, blank=True, null=True,default='')
+    idRole = models.ForeignKey('Role', on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.Name
+class Role(models.Model):
+    nameRole = models.CharField(max_length=30, primary_key = True)
