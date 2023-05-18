@@ -184,7 +184,7 @@ def get_detail_product(request, branch_id, product_id):
                         and p.id = s.product_ptr_id 
                         and p.id = image.idProduct_id
                         and bpc.idBranch_id = %s and p.Id = %s and pc.nameColor_id like image.Name
-                        group by pc.Id
+                        group by pc.Id, pc.idProduct_id, pc.Price, pc.nameColor_id, p.nameManufacture_id, image.linkImg, r.Title, r.Content, s.{1},s.CPU,s.RAM,s.ROM,s.Battery,s.Others,bpc.Amount,image.Name, bpc.Id
 
                        """.format(table, operator_system), [branch_id, product_id])
             rows = cursor.fetchall()
@@ -198,7 +198,7 @@ def get_detail_product(request, branch_id, product_id):
                         and p.id = s.product_ptr_id 
                         and p.id = image.idProduct_id
                         and bpc.idBranch_id = %s and p.Name = %s and pc.nameColor_id like image.Name
-                        group by pc.idProduct_id
+                        group by pc.idProduct_id, pc.Id, pc.Price, pc.nameColor_id, p.Name, p.nameManufacture_id, image.linkimg, r.Title, r.Content, s.{1},s.CPU,s.RAM,s.ROM,s.Battery,s.Others,bpc.Amount,image.Name, bpc.Id
 
                                """.format(table, operator_system), [branch_id, name_TMP])
             pb = cursor.fetchall()
@@ -277,7 +277,7 @@ def get_detail_product(request, branch_id, product_id):
                     LEFT JOIN {0} s ON p2.Id = s.product_ptr_id 
                     JOIN cellphoneapp_branch_product_color bpc ON b.Id = bpc.idBranch_id AND pc.Id = bpc.idProductColor_id 
                     WHERE b.Id = %s AND s.{1} IS NOT NULL and p2.Name like %s and pc.nameColor_id like i.Name and p.Active = 1
-                    group by pc.idProduct_id
+                    group by pc.idProduct_id, pc.Id, pc.Price,pc.nameColor_id, bpp.discountRate, p.timeStart, p.timeEnd, bp.Amount, b.Name, p2.Name, m.names, i.linkImg, r.Title, r.Content, s.{1}, s.CPU, s.RAM, s.ROM, s.Battery, s.Others, bpc.Amount,i.Name
                     LIMIT 0, 1000;
                 """.format(table, operator_system), [branch_id, name_TMP])
             pb = cursor.fetchall()
@@ -356,8 +356,7 @@ def get_products_phones(request, branch_id):
             LEFT JOIN cellphoneapp_smartphone s ON p2.Id = s.product_ptr_id 
             JOIN cellphoneapp_branch_product_color bpc ON b.Id = bpc.idBranch_id AND pc.Id = bpc.idProductColor_id 
             WHERE b.Id = %s AND s.Operator_System IS NOT NULL and  pc.nameColor_id like i.Name and p.Active = 1
-            group by  pc.idProduct_id
-            LIMIT 0, 1000;
+            group by  pc.idProduct_id, pc.Id, pc.Price, pc.nameColor_id, bpp.discountRate,  p.timeStart, p.timeEnd, bp.Amount, b.Name, p2.Name, m.names, i.linkImg, r.Title, r.Content, s.Operator_System, s.CPU, s.RAM, s.ROM, s.Battery, s.Others, bpc.Amount, bp.Id
 
            """, [branch_id])
         rows = cursor.fetchall()
@@ -404,7 +403,7 @@ def get_products_phones_all(request, branch_id):
 		p.Id = im.idProduct_id and
         b.id = %s and
         Operator_System is not null
-        group by p.id
+        group by p.id, bpc.idBranch_id, pc.Id, pc.Price, p.nameManufacture_id, pc.nameColor_id, m.Operator_System, m.CPU, m.RAM, m.ROM, m.Battery, m.Others, p.Name, im.Name, im.linkImg, bpc.Amount
            """, [branch_id])
         rows = cursor.fetchall()
 
@@ -448,7 +447,7 @@ def get_products_laptop(request, branch_id):
             LEFT JOIN cellphoneapp_laptop s ON p2.Id = s.product_ptr_id 
             JOIN cellphoneapp_branch_product_color bpc ON b.Id = bpc.idBranch_id AND pc.Id = bpc.idProductColor_id 
             WHERE b.Id = %s AND s.operatorSystem IS NOT NULL and  pc.nameColor_id like i.Name and p.Active = 1
-            group by  pc.idProduct_id
+            group by  pc.idProduct_id, pc.Id, pc.Price, pc.nameColor_id, bpp.discountRate, p.timeStart, p.timeEnd, bp.Amount, b.Name, p2.Name, m.names, i.linkImg, r.Title, r.Content, s.operatorSystem, s.CPU, s.RAM, s.ROM, s.Battery, s.Others, bpc.Amount , bp.Id
             LIMIT 0, 1000;
            """, [branch_id])
         rows = cursor.fetchall()
@@ -495,7 +494,7 @@ def get_products_laptops_all(request, branch_id):
 		p.Id = im.idProduct_id and
         b.id = %s and
         operatorSystem is not null
-        group by p.id
+        group by p.id, bpc.idBranch_id, pc.Id, pc.Price, p.nameManufacture_id, pc.nameColor_id, l.operatorSystem, l.CPU,l.RAM,l.ROM,l.Battery,l.Others, p.Name, im.Name , im.linkImg, bpc.Amount
            """, [branch_id])
         rows = cursor.fetchall()
 
@@ -550,7 +549,7 @@ def get_order_lockup(request, deliveryPhone):
             JOIN cellphoneapp_product_color pc ON bpc.idProductColor_id = pc.id
             JOIN cellphoneapp_product p ON pc.idProduct_id = p.id
             WHERE o.deliveryPhone = %s AND o.Status in (1,2) 
-            GROUP BY o.id
+            GROUP BY o.id, o.Status, bpc.Id
         """, [deliveryPhone])
         rows = cursor.fetchall()
         data = [
@@ -584,7 +583,7 @@ def search(request, branch_id, name_product):
                         LEFT JOIN cellphoneapp_review r ON p2.Id = r.idProduct_id 
                         JOIN cellphoneapp_branch_product_color bpc ON b.Id = bpc.idBranch_id AND pc.Id = bpc.idProductColor_id 
                         WHERE b.Id = %s  and  pc.nameColor_id like i.Name and p.Active = 1 and p2.Name like  %s
-                        group by  pc.idProduct_id
+                        group by  pc.idProduct_id, pc.Id, pc.Price, pc.nameColor_id, bpp.discountRate, p.timeStart, p.timeStart, p.timeEnd, bp.Amount, b.Name, p2.Name, m.names, i.linkImg, r.Title, r.Content, bpc.Amount, bp.Id
                         LIMIT 0, 1000;
 
                   """, [branch_id, f'%{name_product}%'])
@@ -625,7 +624,7 @@ def search(request, branch_id, name_product):
                                 pc.idProduct_id = p.Id and
                                 p.Id = im.idProduct_id and
                                 b.id = %s and p.Name like %s
-                                group by p.id
+                                group by p.Id, bpc.idBranch_id, pc.Id, pc.Price, p.nameManufacture_id, pc.nameColor_id, p.Name, im.Name, im.linkImg, bpc.Amount, bpc.Id
                              """, [branch_id, f'%{name_product}%'])
             rows2 = cursor.fetchall()
             data2 = []
@@ -686,7 +685,7 @@ def search_price(request, branch_id,from_price, to_price,type_product):
                          LEFT JOIN cellphoneapp_review r ON p2.Id = r.idProduct_id 
                          JOIN cellphoneapp_branch_product_color bpc ON b.Id = bpc.idBranch_id AND pc.Id = bpc.idProductColor_id 
                          WHERE b.Id = %s  and  pc.nameColor_id like i.Name and p.Active = 1 and (pc.Price - (pc.Price * bpp.discountRate))  BETWEEN %s AND  %s and p2.Type = %s
-                         group by  pc.idProduct_id
+                         group by  pc.idProduct_id, pc.Id, pc.Price, pc.nameColor_id, bpp.discountRate, p.timeStart, p.timeEnd, bp.Amount, b.Name, p2.Name, m.names, i.linkImg, r.Title, r.Content, bpc.Amount ,bp.Id
                          LIMIT 0, 1000;
 
                    """, [branch_id, from_price, to_price,type])
@@ -727,7 +726,7 @@ def search_price(request, branch_id,from_price, to_price,type_product):
                                  pc.idProduct_id = p.Id and
                                  p.Id = im.idProduct_id and
                                  b.id = %s and pc.Price between %s and %s and p.Type = %s
-                                 group by p.id
+                                 group by bpc.idBranch_id, p.Id, pc.Price, p.nameManufacture_id, pc.nameColor_id, p.Name, im.Name, im.linkImg, bpc.Amount, bpc.Id
                               """, [branch_id,  from_price, to_price,type])
         rows2 = cursor.fetchall()
         data2 = []
